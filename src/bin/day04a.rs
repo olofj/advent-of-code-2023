@@ -85,12 +85,15 @@ fn main() {
         })
         .collect::<Vec<_>>();
 
-    let total: usize = cards.iter().map(|c| {
-        let value = c.1.iter().count();
-        let value = if value > 0 { 1 << (value-1) } else { 0 };
-        println!("card {:?}", c);
-        println!("value: {}", value);
-        value
-    }).sum();
+    let total: usize = cards
+        .iter()
+        .map(|c| {
+            let value = c.1.iter().count();
+            let value = if value > 0 { 1 << (value - 1) } else { 0 };
+            println!("card {:?}", c);
+            println!("value: {}", value);
+            value
+        })
+        .sum();
     println!("Total winnings: {}", total);
 }

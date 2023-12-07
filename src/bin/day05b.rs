@@ -4,7 +4,6 @@ fn translate(val: (usize, usize), table: &Vec<(usize, usize, usize)>) -> Vec<(us
     let mut ret: Vec<(usize, usize)> = Vec::new();
     let mut vals: Vec<(usize, usize)> = vec![val];
 
-
     'vals: while let Some(val) = vals.pop() {
         for (dst, src, sz) in table {
             let mut start = val.0;
@@ -77,5 +76,4 @@ fn main() {
     data.sort();
 
     println!("Closest: {}", data.iter().map(|d| d.0).min().unwrap());
-
 }

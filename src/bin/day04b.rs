@@ -168,7 +168,7 @@ fn main() {
 
     let mut ncards = vec![1; cards.len()];
     for (i, c) in cards.iter().enumerate() {
-        for j in (i+1)..=(i+c.1) {
+        for j in (i + 1)..=(i + c.1) {
             ncards[j] += ncards[i];
         }
     }
