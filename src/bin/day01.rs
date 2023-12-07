@@ -1,4 +1,4 @@
-fn day01a(infile: &str) {
+fn day01a(infile: &str) ->u32 {
     let sum: u32 = infile
         //    let input: Vec<&str> = include_str!("sample-day01.txt")
         .lines()
@@ -7,6 +7,7 @@ fn day01a(infile: &str) {
         .sum();
 
     println!("sum {:#?}", sum);
+    sum
 }
 
 const REPLACE: &'static [(&str, u32)] = &[
@@ -21,7 +22,7 @@ const REPLACE: &'static [(&str, u32)] = &[
     ("nine", 9),
 ];
 
-fn day01b(infile: &str) {
+fn day01b(infile: &str) -> u32 {
     let input: Vec<_> = infile
         .lines()
         .map(|line| {
@@ -56,6 +57,7 @@ fn day01b(infile: &str) {
         .collect();
 
     println!("sum {}", input.iter().sum::<u32>());
+    input.iter().sum::<u32>()
 }
 
 fn main() {
@@ -67,4 +69,21 @@ fn main() {
     day01b(include_str!("sample-day01b.txt"));
     println!("day01b input");
     day01b(include_str!("input-day01.txt"));
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_day01a() {
+        let input = include_str!("sample-day01a.txt");
+        assert_eq!(day01a(input), 142); // Replace 142 with the expected result
+    }
+
+    #[test]
+    fn test_day01b() {
+        let input = include_str!("sample-day01b.txt");
+        assert_eq!(day01b(input), 281); // Replace 281 with the expected result
+    }
 }
