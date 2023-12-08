@@ -6,19 +6,20 @@ use std::iter::FromIterator;
 struct Hand(Vec<char>);
 
 const VALUES: &'static [(char, u32)] = &[
-    ('2', 1),
-    ('3', 2),
-    ('4', 3),
-    ('5', 4),
-    ('6', 5),
-    ('7', 6),
-    ('8', 7),
-    ('9', 8),
-    ('T', 9),
-    ('J', 10),
-    ('Q', 11),
-    ('K', 12),
-    ('A', 13),
+    ('j', 1), // Joker, only used for step 2
+    ('2', 2),
+    ('3', 3),
+    ('4', 4),
+    ('5', 5),
+    ('6', 6),
+    ('7', 7),
+    ('8', 8),
+    ('9', 9),
+    ('T', 10),
+    ('J', 11),
+    ('Q', 12),
+    ('K', 13),
+    ('A', 14),
 ];
 
 fn cardval(c: &char) -> u32 {
@@ -48,6 +49,10 @@ impl FromIterator<char> for Hand {
 fn value(hand: &Hand) -> u32 {
     let mut cards = HashMap::new();
     for c in hand.iter() {
+        // Don't insert jokers, since we match them separately below
+        if *c == 'j' {
+            continue;
+        }
         if let Some(count) = cards.get(c) {
             cards.insert(*c, count + 1);
         } else {
@@ -66,18 +71,36 @@ fn value(hand: &Hand) -> u32 {
     // - Two pair, where two cards share one label, two other cards share a second label, and the remaining card has a third label: 23432
     // - One pair, where two cards share one label, and the other three cards have a different label from the pair and each other: A23A4
     // - High card, where all cards' labels are distinct: 23456
+    // For second subproblem, Jokers are introduced and they use the same 'J' encoding. So we can
+    // keep one table, use 'j' for Joker instead. Joker is good for any card, but compares at
+    // lowest value possible.
     let handvalue = match cards[..] {
-        [5] => 8,
-        [4, 1] => 7,
-        [3, 2] => 6,
-        [3, 1, 1] => 5,
-        [2, 2, 1] => 4,
-        [2, 1, 1, 1] => 3,
-        [1, 1, 1, 1, 1] => 2,
-        _ => 1,
+        [5] => Some(8),
+        [4] => Some(8), // 1 joker
+        [3] => Some(8), // 2 jokers
+        [2] => Some(8), // 3 jokers
+        [1] => Some(8), // 4 jokers
+        [] => Some(8),  // 5 jokers
+        [4, 1] => Some(7),
+        [3, 1] => Some(7), // 1 joker
+        [2, 1] => Some(7), // 2 hokers
+        [1, 1] => Some(7), // 3 jokers
+        [3, 2] => Some(6),
+        [2, 2] => Some(6), // 1 joker
+        [3, 1, 1] => Some(5),
+        [2, 1, 1] => Some(5), // 1 joker
+        [1, 1, 1] => Some(5), // 2 jokers
+        [2, 2, 1] => Some(4), // 3 jokers
+        [2, 1, 1, 1] => Some(3),
+        [1, 1, 1, 1] => Some(3), // 1 joker
+        [1, 1, 1, 1, 1] => Some(2),
+        _ => {
+            println!("unknown combo {:?}", cards);
+            None
+        }
     };
     //    println!("cards: {:#?} value: {}", hand, handvalue);
-    handvalue
+    handvalue.unwrap_or(0)
 }
 
 impl PartialEq for Hand {
@@ -110,7 +133,7 @@ impl Ord for Hand {
     }
 }
 
-fn day07a(infile: &str) {
+fn day07(infile: &str) -> usize {
     let input: Vec<(Hand, usize)> = infile
         .lines()
         .map(|l| l.split_once(" ").unwrap())
@@ -124,25 +147,22 @@ fn day07a(infile: &str) {
 
     let mut hands: Vec<(Hand, usize)> = input.clone();
     hands.sort();
-    let (hands, bets): (Vec<Hand>, Vec<usize>) = hands.into_iter().unzip();
+    let (_, bets): (Vec<Hand>, Vec<usize>) = hands.into_iter().unzip();
     let winnings: usize = bets.iter().enumerate().map(|(i, b)| b * (i + 1)).sum();
 
     println!("winnings {}", winnings);
-}
-
-fn day07b(infile: &str) {
-    let input: Vec<_> = infile.lines().collect();
+    winnings
 }
 
 fn main() {
-    println!("day07a sample (should be 142)");
-    day07a(include_str!("sample-day07.txt"));
+    println!("day07a sample (should be 6440)");
+    day07(include_str!("sample-day07a.txt"));
     println!("day07a input");
-    day07a(include_str!("input-day07.txt"));
-    println!("day07b sample (should be 281)");
-    day07b(include_str!("sample-day07.txt"));
+    day07(include_str!("input-day07.txt"));
+    println!("day07b sample (should be 5905)");
+    day07(&include_str!("sample-day07b.txt").replace("J", "j"));
     println!("day07b input");
-    day07b(include_str!("input-day07.txt"));
+    day07(&include_str!("input-day07.txt").replace("J", "j"));
 }
 
 #[cfg(test)]
@@ -151,13 +171,13 @@ mod tests {
 
     #[test]
     fn test_day07a() {
-        let input = include_str!("sample-day07.txt");
-        assert_eq!(day07a(input), 142); // Replace 142 with the expected result
+        let input = include_str!("sample-day07a.txt");
+        assert_eq!(day07(&input), 6440); // Replace 142 with the expected result
     }
 
     #[test]
     fn test_day07b() {
-        let input = include_str!("sample-day07.txt");
-        assert_eq!(day07b(input), 281); // Replace 281 with the expected result
+        let input = include_str!("sample-day07b.txt").replace("J", "j");
+        assert_eq!(day07(&input), 5905); // Replace 281 with the expected result
     }
 }
