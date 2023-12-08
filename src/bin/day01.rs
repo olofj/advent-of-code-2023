@@ -1,4 +1,4 @@
-fn day01a(infile: &str) ->u32 {
+fn day01a(infile: &str) -> u32 {
     let sum: u32 = infile
         //    let input: Vec<&str> = include_str!("sample-day01.txt")
         .lines()
