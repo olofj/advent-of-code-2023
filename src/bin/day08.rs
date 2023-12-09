@@ -35,7 +35,7 @@ fn next_exit<'a>(
     (moves, current)
 }
 
-fn day08a(infile: &str) {
+fn day08a(infile: &str) -> usize {
     let mut input = infile.lines();
     let steps: Vec<char> = input.next().unwrap().chars().collect();
     let mut map: HashMap<&str, (&str, &str)> = HashMap::new();
@@ -72,9 +72,10 @@ fn day08a(infile: &str) {
         }
         current = next;
     }
+    moves
 }
 
-fn day08b(infile: &str) {
+fn day08b(infile: &str) -> usize {
     let mut map: HashMap<&str, (&str, &str)> = HashMap::new();
     let mut input = infile.lines();
     let steps: Vec<char> = input.next().unwrap().chars().collect();
@@ -125,6 +126,7 @@ fn day08b(infile: &str) {
     }
 
     println!("common is {}", common);
+    common
 }
 
 fn main() {
@@ -142,4 +144,27 @@ fn main() {
 
     println!("day08b input");
     day08b(&include_str!("input-day08.txt"));
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_day08a() {
+        let input = include_str!("sample-day08a.txt");
+        assert_eq!(day08a(&input), 2);
+    }
+
+    #[test]
+    fn test_day08a2() {
+        let input = include_str!("sample-day08a2.txt");
+        assert_eq!(day08a(&input), 6);
+    }
+
+    #[test]
+    fn test_day08b() {
+        let input = include_str!("sample-day08b.txt");
+        assert_eq!(day08b(&input), 6); // Replace 281 with the expected result
+    }
 }
