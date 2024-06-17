@@ -1,4 +1,3 @@
-
 fn distance(from: &(usize, usize), to: &(usize, usize)) -> usize {
     let f: (isize, isize) = (from.0 as isize, from.1 as isize);
     let t: (isize, isize) = (to.0 as isize, to.1 as isize);
@@ -9,27 +8,87 @@ fn distance(from: &(usize, usize), to: &(usize, usize)) -> usize {
 fn day11a(infile: &str) -> usize {
     let input: Vec<Vec<char>> = infile.lines().map(|l| l.chars().collect()).collect();
 
-    let gals: Vec<(usize, usize)> = input.iter().enumerate().flat_map(|(x,l)| l.iter().enumerate().filter_map(|(y,c)| if *c == '#' { Some((x,y)) } else { None }).collect::<Vec<(usize,usize)>>()).collect();
+    let gals: Vec<(usize, usize)> = input
+        .iter()
+        .enumerate()
+        .flat_map(|(x, l)| {
+            l.iter()
+                .enumerate()
+                .filter_map(|(y, c)| if *c == '#' { Some((x, y)) } else { None })
+                .collect::<Vec<(usize, usize)>>()
+        })
+        .collect();
 
     // Can can easily filter out the coordinates for all galaxies from possible rows/columns to duplicate
-    let gal_x: Vec<usize> = gals.iter().map(|(x,_)| *x).collect();
-    let gal_y: Vec<usize> = gals.iter().map(|(_,y)| *y).collect();
-    let dup_x: Vec<usize> = (0..input.len()).filter(|x| ! gal_x.contains(x)).collect();
-    let dup_y: Vec<usize> = (0..input.len()).filter(|y| ! gal_y.contains(y)).collect();
+    let gal_x: Vec<usize> = gals.iter().map(|(x, _)| *x).collect();
+    let gal_y: Vec<usize> = gals.iter().map(|(_, y)| *y).collect();
+    let dup_x: Vec<usize> = (0..input.len()).filter(|x| !gal_x.contains(x)).collect();
+    let dup_y: Vec<usize> = (0..input[0].len()).filter(|y| !gal_y.contains(y)).collect();
 
     // Now let's adjust the coordinates for all galaxies accordingly
-    let exp_gals: Vec<(usize, usize)> = gals.into_iter().map(|(x,y)| (x + dup_x.iter().filter(|&xx| xx < &x).count(), y+dup_y.iter().filter(|&yy| yy < &y).count())).collect();
+    let exp_gals: Vec<(usize, usize)> = gals
+        .into_iter()
+        .map(|(x, y)| {
+            (
+                x + dup_x.iter().filter(|&xx| xx < &x).count(),
+                y + dup_y.iter().filter(|&yy| yy < &y).count(),
+            )
+        })
+        .collect();
 
     let mut pairs = Vec::new();
     for i in 0..exp_gals.len() {
-        for j in (i+1)..exp_gals.len() {
+        for j in (i + 1)..exp_gals.len() {
             pairs.push((exp_gals[i], exp_gals[j]));
         }
     }
 
     let total = pairs.iter().map(|(from, to)| distance(from, to)).sum();
     println!("total: {}", total);
-    total 
+    total
+}
+
+fn day11b(infile: &str, mult: usize) -> usize {
+    let input: Vec<Vec<char>> = infile.lines().map(|l| l.chars().collect()).collect();
+
+    let gals: Vec<(usize, usize)> = input
+        .iter()
+        .enumerate()
+        .flat_map(|(x, l)| {
+            l.iter()
+                .enumerate()
+                .filter_map(|(y, c)| if *c == '#' { Some((x, y)) } else { None })
+                .collect::<Vec<(usize, usize)>>()
+        })
+        .collect();
+
+    // Can can easily filter out the coordinates for all galaxies from possible rows/columns to duplicate
+    let gal_x: Vec<usize> = gals.iter().map(|(x, _)| *x).collect();
+    let gal_y: Vec<usize> = gals.iter().map(|(_, y)| *y).collect();
+    let dup_x: Vec<usize> = (0..input.len()).filter(|x| !gal_x.contains(x)).collect();
+    let dup_y: Vec<usize> = (0..input[0].len()).filter(|y| !gal_y.contains(y)).collect();
+
+    // Now let's adjust the coordinates for all galaxies accordingly
+    let exp_gals: Vec<(usize, usize)> = gals
+        .into_iter()
+        .map(|(x, y)| {
+            (
+                x + dup_x.iter().filter(|&xx| xx < &x).count()*(mult-1),
+                y + dup_y.iter().filter(|&yy| yy < &y).count()*(mult-1),
+            )
+        })
+        .collect();
+
+    let mut pairs = Vec::new();
+    for i in 0..exp_gals.len() {
+        for j in (i + 1)..exp_gals.len() {
+            pairs.push((exp_gals[i], exp_gals[j]));
+        }
+    }
+
+    let total = pairs.iter().map(|(from, to)| distance(from, to)).sum();
+    println!("total: {}", total);
+    total
 }
 
 fn main() {
@@ -38,6 +97,16 @@ fn main() {
 
     println!("day11a input");
     day11a(include_str!("input-day11.txt"));
+
+    println!("day11b sample with 10 multiplier");
+    day11b(include_str!("sample-day11.txt"), 10);
+
+    println!("day11b sample with 100 multiplier");
+    day11b(include_str!("sample-day11.txt"), 100);
+
+    println!("day11b input");
+    day11b(include_str!("input-day11.txt"), 1000000);
+
 }
 
 #[cfg(test)]
